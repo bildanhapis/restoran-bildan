@@ -73,8 +73,8 @@
                     <i data-lucide="moon" id="icon-theme" class="w-5 h-5"></i>
                 </button>
 
-                <button onclick="toggleStaffMode()" class="p-2 rounded-full hover:bg-white/20 transition text-white relative" title="Mode Pegawai">
-                    <i data-lucide="briefcase" class="w-5 h-5"></i>
+                <button onclick="toggleStaffMode()" class="p-2 rounded-full hover:bg-white/20 transition text-white relative" title="Lihat Riwayat">
+                    <i data-lucide="history" class="w-5 h-5"></i>
                 </button>
                 
                 <div class="relative cursor-pointer p-2 rounded-full hover:bg-white/20 transition text-white" onclick="openCart()">
@@ -132,9 +132,9 @@
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <h2 class="text-2xl font-bold dark:text-white flex items-center gap-2">
-                            <i data-lucide="clipboard-list" class="text-blue-600"></i> Data Pemesanan
+                            <i data-lucide="history" class="text-blue-600"></i> Riwayat Pesanan
                         </h2>
-                        <p class="text-sm text-slate-500 dark:text-slate-400">Halo Pegawai, berikut pesanan masuk hari ini.</p>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Hi Pelanggan Terhormat, berikut riwayat pesanan Anda.</p>
                     </div>
                     <button onclick="refreshOrders()" class="p-2 bg-slate-100 dark:bg-slate-700 rounded-full hover:bg-blue-100 dark:hover:bg-slate-600 transition">
                         <i data-lucide="refresh-cw" class="w-5 h-5 text-slate-600 dark:text-slate-300"></i>
@@ -163,7 +163,7 @@
                 
                 <div id="empty-orders-msg" class="hidden text-center py-10 text-slate-400">
                     <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-                    <p>Belum ada pesanan masuk.</p>
+                    <p>Belum ada riwayat pesanan.</p>
                 </div>
             </div>
         </div>
@@ -598,7 +598,7 @@
             const navBtn = document.querySelector('button[onclick="toggleStaffMode()"] i');
 
             if (view === 'staff') {
-                if(!currentUser) { alert("Harap login terlebih dahulu untuk akses pegawai!"); openAuthModal(); switchView('customer'); return; }
+                if(!currentUser) { alert("Harap login terlebih dahulu untuk akses riwayat!"); openAuthModal(); switchView('customer'); return; }
                 customerView.classList.add('hidden');
                 staffView.classList.remove('hidden');
                 navBtn.setAttribute('data-lucide', 'utensils'); // Change icon to menu
@@ -606,7 +606,7 @@
             } else {
                 staffView.classList.add('hidden');
                 customerView.classList.remove('hidden');
-                navBtn.setAttribute('data-lucide', 'briefcase'); // Change icon to staff
+                navBtn.setAttribute('data-lucide', 'history'); // Change icon to staff/history
             }
             lucide.createIcons();
         }
