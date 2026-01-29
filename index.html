@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Resto Bildan - Ocean Blue Edition</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0ea5e9',   /* Sky 500 */
+                        secondary: '#1e40af', /* Blue 800 */
+                        darkbg: '#0f172a',
+                        darkcard: '#1e293b',
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; transition: background-color 0.3s, color 0.3s; -webkit-tap-highlight-color: transparent; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, #38bdf8, #1e40af); border-radius: 10px; }
+        
+        .bg-gradient-brand { background: linear-gradient(90deg, #38bdf8 0%, #2563eb 100%); }
+        .text-gradient-brand { 
+            background: linear-gradient(90deg, #0284c7 0%, #1e3a8a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .dark .text-gradient-brand { 
+            background: linear-gradient(90deg, #38bdf8 0%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .scale-in { animation: scaleIn 0.3s ease-out forwards; opacity: 0; }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        /* Hide Scrollbar but allow scroll */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-darkbg dark:text-gray-100 pb-24 transition-colors duration-300 font-sans">
+
+    <header class="bg-gradient-brand p-4 sticky top-0 z-40 shadow-lg text-white transition-all">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold flex items-center gap-2 cursor-pointer" onclick="switchView('customer')">
+                <i data-lucide="utensils" class="w-6 h-6 text-white"></i> 
+                <span class="hidden sm:inline">Resto Bildan</span>
+                <span class="sm:hidden">Bildan</span>
+            </h1>
+            
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div id="user-section" class="hidden md:flex items-center gap-2 mr-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
+                    <i data-lucide="user" class="w-4 h-4"></i>
+                    <span id="user-name" class="text-xs font-bold truncate max-w-[100px]">Tamu</span>
+                </div>
+
+                <button id="btn-auth" onclick="openAuthModal()" class="text-xs bg-white text-blue-600 px-3 py-1.5 rounded-full font-bold hover:bg-blue-50 transition shadow-sm">
+                    Masuk
+                </button>
+
+                <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-white/20 transition text-white">
+                    <i data-lucide="moon" id="icon-theme" class="w-5 h-5"></i>
+                </button>
+
+                <button onclick="toggleStaffMode()" class="p-2 rounded-full hover:bg-white/20 transition text-white relative" title="Mode Pegawai">
+                    <i data-lucide="briefcase" class="w-5 h-5"></i>
+                </button>
+                
+                <div class="relative cursor-pointer p-2 rounded-full hover:bg-white/20 transition text-white" onclick="openCart()">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span id="cart-badge" class="hidden absolute top-0 right-0 bg-yellow-400 text-blue-900 text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-md border-2 border-transparent">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-4 space-y-6 min-h-screen">
+
+        <div id="view-customer" class="space-y-6">
+            <section class="bg-white dark:bg-darkcard p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                    <h2 class="text-base font-bold flex items-center gap-2 text-blue-600 dark:text-sky-400">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i> Rekomendasi AI
+                    </h2>
+                    <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+                        <button onclick="setWeather('sunny')" id="btn-sunny" class="px-3 py-1.5 rounded-md text-xs font-medium flex gap-1 items-center bg-white dark:bg-slate-700 shadow-sm text-yellow-600 dark:text-yellow-400 transition">
+                            <i data-lucide="sun" class="w-3 h-3"></i> Panas
+                        </button>
+                        <button onclick="setWeather('rainy')" id="btn-rainy" class="px-3 py-1.5 rounded-md text-xs font-medium flex gap-1 items-center text-slate-500 dark:text-slate-400 transition">
+                            <i data-lucide="cloud-rain" class="w-3 h-3"></i> Hujan
+                        </button>
+                    </div>
+                </div>
+                <p id="ai-message" class="text-xs text-slate-500 dark:text-slate-400 mb-4">Memuat rekomendasi...</p>
+                <div id="ai-container" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3"></div>
+            </section>
+
+            <section>
+                <div class="sticky top-[72px] z-30 py-3 bg-slate-50 dark:bg-darkbg -mx-4 px-4 backdrop-blur-sm bg-opacity-95">
+                     <div class="relative mb-3 max-w-lg mx-auto md:mx-0">
+                        <i data-lucide="search" class="absolute left-3 top-2.5 text-slate-400 w-4 h-4"></i>
+                        <input type="text" id="search-input" placeholder="Cari menu..." 
+                            class="w-full pl-9 pr-4 py-2 border-none rounded-xl bg-white dark:bg-darkcard shadow-sm focus:ring-2 focus:ring-blue-400 dark:text-white transition text-sm">
+                    </div>
+                    <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                        <button onclick="filterCategory('All')" class="cat-btn bg-gradient-brand text-white px-4 py-2 rounded-full text-xs font-bold shadow-md shadow-blue-200 dark:shadow-none transition transform hover:scale-105 whitespace-nowrap">Semua</button>
+                        <button onclick="filterCategory('Nasi')" class="cat-btn bg-white dark:bg-darkcard text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition hover:border-blue-400 hover:text-blue-500">Nasi</button>
+                        <button onclick="filterCategory('Mie')" class="cat-btn bg-white dark:bg-darkcard text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition hover:border-blue-400 hover:text-blue-500">Mie</button>
+                        <button onclick="filterCategory('Western')" class="cat-btn bg-white dark:bg-darkcard text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition hover:border-blue-400 hover:text-blue-500">Western</button>
+                        <button onclick="filterCategory('Snack')" class="cat-btn bg-white dark:bg-darkcard text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition hover:border-blue-400 hover:text-blue-500">Cemilan</button>
+                        <button onclick="filterCategory('Minuman')" class="cat-btn bg-white dark:bg-darkcard text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition hover:border-blue-400 hover:text-blue-500">Minuman</button>
+                    </div>
+                </div>
+
+                <div id="menu-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 mt-2"></div>
+            </section>
+        </div>
+
+        <div id="view-staff" class="hidden space-y-6">
+            <div class="bg-white dark:bg-darkcard p-6 rounded-3xl shadow-lg border border-slate-100 dark:border-slate-800">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold dark:text-white flex items-center gap-2">
+                            <i data-lucide="clipboard-list" class="text-blue-600"></i> Data Pemesanan
+                        </h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Halo Pegawai, berikut pesanan masuk hari ini.</p>
+                    </div>
+                    <button onclick="refreshOrders()" class="p-2 bg-slate-100 dark:bg-slate-700 rounded-full hover:bg-blue-100 dark:hover:bg-slate-600 transition">
+                        <i data-lucide="refresh-cw" class="w-5 h-5 text-slate-600 dark:text-slate-300"></i>
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left hidden md:table">
+                        <thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase font-bold">
+                            <tr>
+                                <th class="p-4 rounded-l-xl">Resi</th>
+                                <th class="p-4">Pelanggan</th>
+                                <th class="p-4">Menu</th>
+                                <th class="p-4">Total</th>
+                                <th class="p-4">Pembayaran</th>
+                                <th class="p-4 rounded-r-xl">Waktu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staff-orders-table" class="text-sm dark:text-slate-300 divide-y divide-slate-100 dark:divide-slate-700">
+                            </tbody>
+                    </table>
+
+                    <div id="staff-orders-cards" class="md:hidden space-y-3">
+                        </div>
+                </div>
+                
+                <div id="empty-orders-msg" class="hidden text-center py-10 text-slate-400">
+                    <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                    <p>Belum ada pesanan masuk.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="cart-overlay" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-darkcard border-t dark:border-slate-800 shadow-[0_-8px_30px_rgba(0,0,0,0.15)] p-4 transform translate-y-full transition-transform duration-300 z-50 rounded-t-3xl max-w-6xl mx-auto">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-2 group cursor-pointer" onclick="toggleCartDrawer()">
+                    <h3 class="font-bold text-base dark:text-white flex items-center gap-2">
+                        <i data-lucide="shopping-bag" class="text-blue-600 dark:text-sky-400 w-5 h-5"></i> Pesanan
+                    </h3>
+                    <span id="cart-total-badge" class="text-xs font-bold bg-slate-100 dark:bg-slate-700 text-blue-600 dark:text-sky-400 px-2 py-1 rounded-full">0</span>
+                    <i data-lucide="chevron-up" id="cart-chevron" class="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-transform duration-300"></i>
+                </div>
+                
+                <button onclick="clearCart()" class="text-xs text-red-500 font-bold hover:text-red-700 flex items-center gap-1 bg-red-50 dark:bg-red-900/20 px-3 py-1.5 rounded-full transition">
+                    <i data-lucide="trash-2" class="w-3 h-3"></i> Batal
+                </button>
+            </div>
+
+            <div id="cart-items" class="max-h-60 overflow-y-auto mb-4 space-y-3 hidden scrollbar-hide"></div>
+            
+            <div class="flex justify-between items-center border-t border-dashed border-slate-200 dark:border-slate-700 pt-4 mt-2">
+                <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Total Bayar</p>
+                    <p id="total-price" class="text-xl font-extrabold text-gradient-brand">Rp 0</p>
+                </div>
+                <button onclick="openPaymentModal()" class="bg-gradient-brand text-white px-6 py-3 rounded-full font-bold hover:opacity-90 shadow-lg shadow-blue-500/30 transition transform active:scale-95 flex items-center gap-2 text-sm">
+                    Checkout <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="auth-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[70] p-4 backdrop-blur-md transition-opacity duration-300">
+        <div class="bg-white dark:bg-darkcard w-full max-w-sm rounded-3xl p-8 shadow-2xl transform transition-all scale-95 opacity-0 text-center relative" id="auth-box">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div class="mb-6">
+                <div class="bg-blue-100 dark:bg-slate-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i id="auth-icon" data-lucide="log-in" class="w-8 h-8 text-blue-600 dark:text-sky-400"></i>
+                </div>
+                <h3 id="auth-title" class="text-2xl font-bold dark:text-white text-slate-800">Masuk Akun</h3>
+                <p id="auth-subtitle" class="text-sm text-slate-500 dark:text-slate-400 mt-2">Silakan masuk untuk mulai memesan.</p>
+            </div>
+            <div class="space-y-4">
+                <div class="text-left">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-2">Username</label>
+                    <div class="relative mt-1">
+                        <i data-lucide="user" class="absolute left-3 top-3 text-slate-400 w-4 h-4"></i>
+                        <input type="text" id="auth-name-input" placeholder="Contoh: Bildan" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white transition">
+                    </div>
+                </div>
+                <div class="text-left">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-2">Password</label>
+                    <div class="relative mt-1">
+                        <i data-lucide="lock" class="absolute left-3 top-3 text-slate-400 w-4 h-4"></i>
+                        <input type="password" id="auth-pass-input" placeholder="******" class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white transition">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-2.5 text-slate-400 hover:text-blue-500 transition"><i id="eye-icon" data-lucide="eye" class="w-5 h-5"></i></button>
+                    </div>
+                </div>
+                <button onclick="handleAuthAction()" id="btn-submit-auth" class="w-full bg-gradient-brand text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-500/40 hover:opacity-90 transition active:scale-95 mt-2">Masuk Sekarang</button>
+                <div class="text-sm text-slate-500 dark:text-slate-400 mt-4">
+                    <span id="auth-switch-text">Belum punya akun?</span>
+                    <button onclick="toggleAuthMode()" class="text-blue-600 dark:text-sky-400 font-bold hover:underline ml-1" id="auth-switch-btn">Buat Akun</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="payment-modal" class="fixed inset-0 bg-black/60 hidden items-end sm:items-center justify-center z-[60] p-4 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white dark:bg-darkcard w-full max-w-md rounded-3xl p-6 shadow-2xl transform transition-all scale-95 opacity-0 max-h-[90vh] overflow-y-auto" id="payment-box">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-700">
+                <h3 class="text-lg font-bold dark:text-white text-blue-900">Pilih Pembayaran</h3>
+                <button onclick="closePaymentModal()" class="text-slate-400 hover:text-blue-500 transition bg-slate-50 dark:bg-slate-800 p-1 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="bg-blue-50 dark:bg-slate-800 p-4 rounded-xl mb-4 flex justify-between items-center">
+                <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Total Tagihan</span>
+                <span id="modal-total-price" class="font-extrabold text-lg text-blue-700 dark:text-sky-400">Rp 0</span>
+            </div>
+
+            <div class="space-y-3 mb-6">
+                <label onclick="selectPaymentType('cod')" class="flex items-center gap-4 p-4 border border-slate-200 dark:border-slate-700 bg-white dark:bg-darkcard rounded-2xl cursor-pointer hover:border-blue-500 dark:hover:border-sky-500 transition group relative overflow-hidden" id="opt-cod">
+                    <input type="radio" name="payment_main" value="Tunai (COD)" class="w-5 h-5 text-blue-600 accent-blue-600" checked>
+                    <div class="flex-1 relative z-10">
+                        <span class="block font-bold dark:text-white text-sm group-hover:text-blue-600 flex items-center gap-2"><i data-lucide="banknote" class="w-4 h-4"></i> Tunai (COD)</span>
+                    </div>
+                </label>
+
+                <label onclick="selectPaymentType('ewallet')" class="flex flex-col p-4 border border-slate-200 dark:border-slate-700 bg-white dark:bg-darkcard rounded-2xl cursor-pointer hover:border-blue-500 dark:hover:border-sky-500 transition group relative overflow-hidden" id="opt-ewallet">
+                    <div class="flex items-center gap-4 w-full">
+                        <input type="radio" name="payment_main" value="E-Wallet" class="w-5 h-5 text-blue-600 accent-blue-600">
+                        <div class="flex-1 relative z-10">
+                            <span class="block font-bold dark:text-white text-sm group-hover:text-blue-600 flex items-center gap-2"><i data-lucide="qr-code" class="w-4 h-4"></i> QRIS / E-Wallet</span>
+                        </div>
+                    </div>
+                    
+                    <div id="ewallet-options" class="hidden mt-3 pl-9 grid grid-cols-2 gap-2 animate-fade-in">
+                        <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer">
+                            <input type="radio" name="ewallet_sub" value="GoPay" class="accent-green-500"> 
+                            <span class="text-xs font-bold dark:text-white">GoPay</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer">
+                            <input type="radio" name="ewallet_sub" value="ShopeePay" class="accent-orange-500"> 
+                            <span class="text-xs font-bold dark:text-white">ShopeePay</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer">
+                            <input type="radio" name="ewallet_sub" value="Dana" class="accent-blue-500"> 
+                            <span class="text-xs font-bold dark:text-white">Dana</span>
+                        </label>
+                         <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer">
+                            <input type="radio" name="ewallet_sub" value="OVO" class="accent-purple-500"> 
+                            <span class="text-xs font-bold dark:text-white">OVO</span>
+                        </label>
+                    </div>
+                </label>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="closePaymentModal()" class="w-1/3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold py-3.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-600 transition text-sm">
+                    Batal
+                </button>
+                <button onclick="processPayment()" id="btn-confirm-pay" class="w-2/3 bg-gradient-brand text-white font-bold py-3.5 rounded-full transition hover:opacity-90 shadow-lg shadow-blue-500/40 flex justify-center items-center gap-2 text-sm active:scale-95">
+                    <span>Konfirmasi</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="success-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[80] p-6 backdrop-blur-md transition-opacity duration-300">
+        <div class="bg-white dark:bg-darkcard w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl scale-in relative">
+            <div class="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="check-circle" class="w-10 h-10 text-green-500"></i>
+            </div>
+            <h3 class="text-xl font-bold dark:text-white">Pesanan Berhasil!</h3>
+            <p class="text-sm text-slate-500 mb-4">Terima kasih telah memesan.</p>
+            
+            <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 mb-6">
+                <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nomor Resi</p>
+                <p id="success-resi" class="text-2xl font-mono font-bold text-slate-800 dark:text-white mt-1 select-all">TRX-0000</p>
+                <p id="success-method" class="text-xs font-bold text-blue-600 dark:text-sky-400 mt-2">Metode: -</p>
+            </div>
+
+            <button onclick="closeSuccessModal()" class="w-full bg-slate-800 dark:bg-white text-white dark:text-slate-900 font-bold py-3 rounded-xl hover:opacity-90 transition">
+                Tutup & Pesan Lagi
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        const MENU_ITEMS = [
+            { id: 101, name: "Nasi Ayam Geprek Sambal Korek", category: "Nasi", price: 18000, img: "🐔🌶️", desc: "Pedas nampol!", tags: ["hot"] },
+            { id: 102, name: "Nasi Ayam Crispy Telur", category: "Nasi", price: 20000, img: "🐔🥚", desc: "Ayam renyah + telur.", tags: [] },
+            { id: 103, name: "Ayam Bakar Madu + Nasi", category: "Nasi", price: 22000, img: "🍗🍯", desc: "Bumbu madu meresap.", tags: ["kids"] },
+            { id: 104, name: "Nasi Gila Porsi Jumbo", category: "Nasi", price: 25000, img: "🤪🍛", desc: "Topping sosis bakso.", tags: ["warm"] },
+            { id: 105, name: "Rice Bowl Ayam Teriyaki", category: "Nasi", price: 23000, img: "🍚🍗", desc: "Saus teriyaki gurih.", tags: [] },
+            { id: 106, name: "Nasi Bebek Goreng Serundeng", category: "Nasi", price: 28000, img: "🦆", desc: "Bebek empuk gurih.", tags: ["best"] },
+            { id: 201, name: "Mie Yamin Manis Pedas", category: "Mie", price: 16000, img: "🍜🌶️", desc: "Kecap manis pedas.", tags: ["warm"] },
+            { id: 202, name: "Spaghetti Brulee Creamy", category: "Mie", price: 24000, img: "🍝🧀", desc: "Saus bechamel lumer.", tags: ["kids"] },
+            { id: 203, name: "Bakmi Ayam Jamur Komplit", category: "Mie", price: 21000, img: "🍄🍜", desc: "Topping jamur melimpah.", tags: ["warm"] },
+            { id: 301, name: "Double Cheese Smash Burger", category: "Western", price: 32000, img: "🍔🧀", desc: "Daging sapi & keju.", tags: ["best", "kids"] },
+            { id: 302, name: "Chicken Mentai Rice", category: "Western", price: 28000, img: "🍛", desc: "Saus mentai bakar.", tags: [] },
+            { id: 303, name: "Fish and Chips Tartar Sauce", category: "Western", price: 35000, img: "🐟🍟", desc: "Ikan dori lembut.", tags: ["kids"] },
+            { id: 304, name: "Beef Pepper Rice Hotplate", category: "Western", price: 38000, img: "🥩🍳", desc: "Nasi lada hitam.", tags: ["warm"] },
+            { id: 402, name: "Dimsum Mentai (4 pcs)", category: "Snack", price: 18000, img: "🥟", desc: "Saus mentai.", tags: ["best"] },
+            { id: 405, name: "Kentang Goreng", category: "Snack", price: 19000, img: "🍟", desc: "Renyah gurih.", tags: ["kids"] },
+            { id: 501, name: "Pisang Bakar Coklat Keju", category: "Snack", price: 13000, img: "🍌🍫", desc: "Manis legit.", tags: [] },
+            { id: 502, name: "Roti Bakar Coklat Keju", category: "Snack", price: 15000, img: "🍞🍫", desc: "Klasik topping.", tags: ["kids"] },
+            { id: 601, name: "Kopi Susu Gula Aren", category: "Minuman", price: 18000, img: "☕", desc: "Creamy aren asli.", tags: ["cold", "best"] },
+            { id: 602, name: "Es Coklat Klasik", category: "Minuman", price: 15000, img: "🍫🥤", desc: "Coklat pekat.", tags: ["cold", "kids"] },
+            { id: 603, name: "Lychee Tea", category: "Minuman", price: 20000, img: "🍹", desc: "Teh leci segar.", tags: ["cold"] },
+            { id: 604, name: "Lemon Tea Dingin", category: "Minuman", price: 10000, img: "🍋🧊", desc: "Segar dingin.", tags: ["cold"] },
+            { id: 605, name: "Brown Sugar Boba Milk", category: "Minuman", price: 22000, img: "🧋", desc: "Boba kenyal.", tags: ["cold"] },
+            { id: 606, name: "Jus Alpukat Kocok", category: "Minuman", price: 17000, img: "🥑", desc: "Alpukat mentega.", tags: ["cold"] },
+            { id: 607, name: "Air Mineral", category: "Minuman", price: 5000, img: "💧", desc: "Dingin/Biasa.", tags: ["cold"] }
+        ];
+
+        let cart = [];
+        let currentUser = null;
+        let isDarkMode = false;
+        let isCartOpen = false;
+        let isRegisterMode = false;
+        let currentView = 'customer'; // customer or staff
+
+        const formatRp = (num) => "Rp " + num.toLocaleString("id-ID");
+
+        // --- DATABASE SIMULATION (LocalStorage) ---
+        function getDB(key) { return JSON.parse(localStorage.getItem(key)) || {}; }
+        function saveDB(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+        
+        // Orders Array for Staff View
+        function getAllOrders() { return JSON.parse(localStorage.getItem('resto_orders')) || []; }
+        function addOrder(order) {
+            const orders = getAllOrders();
+            orders.unshift(order); // Add to top
+            localStorage.setItem('resto_orders', JSON.stringify(orders));
+        }
+
+        // --- AUTH LOGIC ---
+        function checkAuth() {
+            if (!currentUser) { openAuthModal(); return false; }
+            return true;
+        }
+
+        function openAuthModal() {
+            document.getElementById('auth-modal').classList.remove('hidden');
+            document.getElementById('auth-modal').classList.add('flex');
+            setTimeout(() => { document.getElementById('auth-box').classList.remove('scale-95', 'opacity-0'); document.getElementById('auth-box').classList.add('scale-100', 'opacity-100'); }, 10);
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-box').classList.remove('scale-100', 'opacity-100'); document.getElementById('auth-box').classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { document.getElementById('auth-modal').classList.add('hidden'); document.getElementById('auth-modal').classList.remove('flex'); }, 300);
+        }
+
+        function toggleAuthMode() {
+            isRegisterMode = !isRegisterMode;
+            const title = document.getElementById('auth-title');
+            const btn = document.getElementById('btn-submit-auth');
+            const switchBtn = document.getElementById('auth-switch-btn');
+            
+            if (isRegisterMode) {
+                title.innerText = "Buat Akun Baru"; btn.innerText = "Daftar & Masuk"; switchBtn.innerText = "Masuk disini";
+            } else {
+                title.innerText = "Masuk Akun"; btn.innerText = "Masuk Sekarang"; switchBtn.innerText = "Buat Akun";
+            }
+        }
+
+        function togglePasswordVisibility() {
+            const passInput = document.getElementById('auth-pass-input');
+            const eyeIcon = document.getElementById('eye-icon');
+            if (passInput.type === "password") { passInput.type = "text"; eyeIcon.setAttribute('data-lucide', 'eye-off'); }
+            else { passInput.type = "password"; eyeIcon.setAttribute('data-lucide', 'eye'); }
+            lucide.createIcons();
+        }
+
+        function handleAuthAction() {
+            const username = document.getElementById('auth-name-input').value.trim();
+            const password = document.getElementById('auth-pass-input').value.trim();
+            const db = getDB('resto_users');
+
+            if (!username || !password) return alert("Isi semua kolom!");
+
+            if (isRegisterMode) {
+                if (db[username]) alert("Username sudah ada!");
+                else {
+                    db[username] = password; saveDB('resto_users', db);
+                    currentUser = username; updateHeaderUI(); closeAuthModal();
+                    alert(`✅ Akun dibuat! Halo, ${currentUser}.`);
+                }
+            } else {
+                if (db[username] && db[username] === password) {
+                    currentUser = username; updateHeaderUI(); closeAuthModal();
+                    alert(`👋 Halo kembali, ${currentUser}!`);
+                } else {
+                    alert("❌ Username/Password salah!");
+                }
+            }
+        }
+
+        function updateHeaderUI() {
+            const btnAuth = document.getElementById('btn-auth');
+            const userSec = document.getElementById('user-section');
+            if (currentUser) {
+                userSec.classList.remove('hidden'); userSec.classList.add('flex');
+                document.getElementById('user-name').innerText = currentUser;
+                btnAuth.innerText = "Keluar"; btnAuth.onclick = () => { if(confirm("Keluar?")) { currentUser = null; cart = []; updateCartUI(); updateHeaderUI(); }};
+                btnAuth.className = "text-xs bg-red-500 text-white px-3 py-1.5 rounded-full font-bold hover:bg-red-600 transition shadow-sm";
+            } else {
+                userSec.classList.add('hidden'); userSec.classList.remove('flex');
+                btnAuth.innerText = "Masuk"; btnAuth.onclick = openAuthModal;
+                btnAuth.className = "text-xs bg-white text-blue-600 px-3 py-1.5 rounded-full font-bold hover:bg-blue-50 transition shadow-sm";
+            }
+        }
+
+        // --- CART LOGIC ---
+        function addToCart(id) {
+            if (!checkAuth()) return;
+            const item = MENU_ITEMS.find(i => i.id === id);
+            const existing = cart.find(i => i.id === id);
+            if(existing) existing.qty++; else cart.push({...item, qty: 1});
+            updateCartUI(); openCart();
+        }
+
+        function changeQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (!item) return;
+            item.qty += delta;
+            if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+            updateCartUI();
+        }
+
+        function clearCart() {
+            if (cart.length > 0 && confirm("Kosongkan keranjang?")) { cart = []; updateCartUI(); }
+        }
+
+        function updateCartUI() {
+            const qty = cart.reduce((a,b) => a + b.qty, 0);
+            const price = cart.reduce((a,b) => a + (b.price * b.qty), 0);
+            document.getElementById('cart-badge').innerText = qty;
+            document.getElementById('cart-badge').classList.toggle('hidden', qty === 0);
+            document.getElementById('total-price').innerText = formatRp(price);
+            document.getElementById('cart-total-badge').innerText = qty;
+            
+            const overlay = document.getElementById('cart-overlay');
+            if(qty > 0) overlay.classList.remove('translate-y-full');
+            else { overlay.classList.add('translate-y-full'); if(isCartOpen) toggleCartDrawer(); }
+
+            document.getElementById('cart-items').innerHTML = cart.map(item => `
+                <div class="flex justify-between items-center p-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-3 flex-1 overflow-hidden">
+                        <div class="text-2xl">${item.img}</div>
+                        <div class="truncate flex-1">
+                             <h4 class="text-sm font-bold dark:text-white truncate">${item.name}</h4>
+                             <div class="text-xs text-slate-500 dark:text-slate-400">${formatRp(item.price)}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg p-1 border border-slate-200 dark:border-slate-600">
+                        <button onclick="changeQty(${item.id}, -1)" class="w-6 h-6 flex items-center justify-center bg-slate-100 dark:bg-slate-600 rounded text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-500">-</button>
+                        <span class="text-sm font-bold w-4 text-center dark:text-white">${item.qty}</span>
+                        <button onclick="changeQty(${item.id}, 1)" class="w-6 h-6 flex items-center justify-center bg-blue-500 text-white rounded text-xs font-bold hover:bg-blue-600">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleCartDrawer() {
+            isCartOpen = !isCartOpen;
+            const itemsDiv = document.getElementById('cart-items');
+            const chevron = document.getElementById('cart-chevron');
+            if(isCartOpen) { itemsDiv.classList.remove('hidden'); chevron.style.transform = "rotate(180deg)"; } 
+            else { itemsDiv.classList.add('hidden'); chevron.style.transform = "rotate(0deg)"; }
+        }
+
+        function openCart() {
+             document.getElementById('cart-overlay').classList.remove('translate-y-full');
+             if(!isCartOpen) toggleCartDrawer();
+        }
+
+        // --- PAYMENT & RESI LOGIC ---
+        function openPaymentModal() {
+            if(cart.length === 0) return alert("Keranjang kosong!");
+            document.getElementById('modal-total-price').innerText = document.getElementById('total-price').innerText;
+            document.getElementById('payment-modal').classList.remove('hidden');
+            document.getElementById('payment-modal').classList.add('flex');
+            setTimeout(() => { document.getElementById('payment-box').classList.remove('scale-95', 'opacity-0'); document.getElementById('payment-box').classList.add('scale-100', 'opacity-100'); }, 10);
+        }
+
+        function closePaymentModal() {
+             document.getElementById('payment-box').classList.remove('scale-100', 'opacity-100'); document.getElementById('payment-box').classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { document.getElementById('payment-modal').classList.add('hidden'); document.getElementById('payment-modal').classList.remove('flex'); }, 300);
+        }
+
+        function selectPaymentType(type) {
+            const ewalletOpts = document.getElementById('ewallet-options');
+            if(type === 'ewallet') ewalletOpts.classList.remove('hidden');
+            else ewalletOpts.classList.add('hidden');
+        }
+
+        function processPayment() {
+            const mainMethod = document.querySelector('input[name="payment_main"]:checked').value;
+            let finalMethod = mainMethod;
+
+            // Jika E-Wallet, cek sub-opsi
+            if (mainMethod === "E-Wallet") {
+                const subMethod = document.querySelector('input[name="ewallet_sub"]:checked');
+                if (!subMethod) {
+                    alert("Silakan pilih jenis E-Wallet (GoPay/ShopeePay/dll)!");
+                    return;
+                }
+                finalMethod = `${subMethod.value} (QRIS)`;
+                
+                // Pop Up konfirmasi E-Wallet
+                if(!confirm(`Konfirmasi pembayaran menggunakan ${subMethod.value}?`)) return;
+            }
+
+            const btn = document.getElementById('btn-confirm-pay');
+            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-5 h-5"></i> Proses...`;
+            btn.disabled = true;
+            lucide.createIcons();
+
+            setTimeout(() => {
+                // Generate RESI
+                const resiID = 'TRX-' + Math.floor(1000 + Math.random() * 9000);
+                const totalPrice = cart.reduce((a,b) => a + (b.price * b.qty), 0);
+                
+                // Simpan Data Pesanan
+                const newOrder = {
+                    resi: resiID,
+                    user: currentUser,
+                    items: [...cart],
+                    total: totalPrice,
+                    method: finalMethod,
+                    date: new Date().toLocaleString(),
+                    status: 'Diproses'
+                };
+                addOrder(newOrder);
+
+                // Show Success Modal
+                document.getElementById('success-resi').innerText = resiID;
+                document.getElementById('success-method').innerText = `Pembayaran: ${finalMethod}`;
+                document.getElementById('success-modal').classList.remove('hidden');
+                document.getElementById('success-modal').classList.add('flex');
+                
+                // Reset UI
+                cart = []; updateCartUI(); closePaymentModal();
+                btn.innerHTML = `<span>Konfirmasi</span>`; btn.disabled = false;
+                
+                // Jika sedang di staff view, refresh
+                if(currentView === 'staff') refreshOrders();
+            }, 1500);
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('success-modal').classList.add('hidden');
+            document.getElementById('success-modal').classList.remove('flex');
+        }
+
+        // --- STAFF VIEW LOGIC ---
+        function toggleStaffMode() {
+            if (currentView === 'customer') switchView('staff');
+            else switchView('customer');
+        }
+
+        function switchView(view) {
+            currentView = view;
+            const customerView = document.getElementById('view-customer');
+            const staffView = document.getElementById('view-staff');
+            const navBtn = document.querySelector('button[onclick="toggleStaffMode()"] i');
+
+            if (view === 'staff') {
+                if(!currentUser) { alert("Harap login terlebih dahulu untuk akses pegawai!"); openAuthModal(); switchView('customer'); return; }
+                customerView.classList.add('hidden');
+                staffView.classList.remove('hidden');
+                navBtn.setAttribute('data-lucide', 'utensils'); // Change icon to menu
+                refreshOrders();
+            } else {
+                staffView.classList.add('hidden');
+                customerView.classList.remove('hidden');
+                navBtn.setAttribute('data-lucide', 'briefcase'); // Change icon to staff
+            }
+            lucide.createIcons();
+        }
+
+        function refreshOrders() {
+            const orders = getAllOrders();
+            const tableBody = document.getElementById('staff-orders-table');
+            const cardContainer = document.getElementById('staff-orders-cards');
+            const emptyMsg = document.getElementById('empty-orders-msg');
+
+            tableBody.innerHTML = '';
+            cardContainer.innerHTML = '';
+
+            if (orders.length === 0) {
+                emptyMsg.classList.remove('hidden');
+            } else {
+                emptyMsg.classList.add('hidden');
+                orders.forEach(order => {
+                    const itemsStr = order.items.map(i => `${i.qty}x ${i.name}`).join(', ');
+                    
+                    // Table Row (Desktop)
+                    tableBody.innerHTML += `
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                            <td class="p-4 font-mono font-bold text-blue-600">${order.resi}</td>
+                            <td class="p-4 font-bold text-slate-700 dark:text-slate-200">${order.user}</td>
+                            <td class="p-4 text-xs text-slate-500 max-w-xs truncate" title="${itemsStr}">${itemsStr}</td>
+                            <td class="p-4 font-bold">${formatRp(order.total)}</td>
+                            <td class="p-4"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold dark:bg-slate-700 dark:text-blue-400">${order.method}</span></td>
+                            <td class="p-4 text-xs text-slate-400">${order.date}</td>
+                        </tr>
+                    `;
+
+                    // Card (Mobile)
+                    cardContainer.innerHTML += `
+                        <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <span class="font-mono font-bold text-blue-600 text-lg">${order.resi}</span>
+                                    <p class="text-xs text-slate-400">${order.date}</p>
+                                </div>
+                                <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold dark:bg-slate-700 dark:text-blue-400">${order.method}</span>
+                            </div>
+                            <div class="mb-3">
+                                <p class="text-sm font-bold text-slate-700 dark:text-slate-200"><i data-lucide="user" class="inline w-3 h-3 mr-1"></i> ${order.user}</p>
+                                <p class="text-xs text-slate-500 mt-1 bg-slate-50 dark:bg-slate-900 p-2 rounded line-clamp-2">${itemsStr}</p>
+                            </div>
+                            <div class="flex justify-between items-center border-t dark:border-slate-700 pt-2">
+                                <span class="text-xs text-slate-500">Total</span>
+                                <span class="font-bold text-lg dark:text-white">${formatRp(order.total)}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            lucide.createIcons();
+        }
+
+        // --- MENU RENDERING ---
+        function renderMenu(filter = 'All', search = '') {
+            const grid = document.getElementById('menu-grid');
+            grid.innerHTML = "";
+            const filtered = MENU_ITEMS.filter(item => {
+                const matchCat = filter === "All" || item.category === filter;
+                const matchSearch = item.name.toLowerCase().includes(search.toLowerCase());
+                return matchCat && matchSearch;
+            });
+
+            if (filtered.length === 0) { grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400">Menu tidak ditemukan.</div>`; return; }
+
+            filtered.forEach(item => {
+                grid.innerHTML += `
+                    <div class="bg-white dark:bg-darkcard rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden hover:shadow-md transition-all duration-300 group flex flex-col h-full relative py-4">
+                        <div class="flex justify-center relative">
+                            <div class="text-5xl sm:text-6xl drop-shadow-sm transition-transform group-hover:scale-110 cursor-default">${item.img}</div>
+                            ${item.tags.includes('best') ? '<span class="absolute top-0 right-2 bg-yellow-400 text-yellow-900 text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">Favorit</span>' : ''}
+                        </div>
+                        <div class="p-3 sm:p-4 flex flex-col flex-grow relative text-center">
+                            <h3 class="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm leading-tight mb-1 line-clamp-2 min-h-[2.5em]">${item.name}</h3>
+                            <div class="mt-auto flex flex-col items-center gap-2">
+                                <span class="font-extrabold text-blue-600 dark:text-sky-400 text-sm sm:text-base">${formatRp(item.price)}</span>
+                                <button onclick="addToCart(${item.id})" class="bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-sky-400 w-full py-2 rounded-xl flex items-center justify-center hover:bg-blue-600 hover:text-white dark:hover:bg-sky-500 dark:hover:text-white transition shadow-sm active:scale-95 text-xs font-bold gap-1 border border-blue-100 dark:border-slate-600">
+                                    <i data-lucide="plus" class="w-4 h-4"></i> Tambah
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+        
+        // --- AI RECOMMENDATION ---
+        function renderAI(weather = 'sunny') {
+            const container = document.getElementById('ai-container');
+            container.innerHTML = "";
+            let recs = weather === "rainy" ? MENU_ITEMS.filter(i => i.tags.includes("warm") || i.category === "Mie") : MENU_ITEMS.filter(i => i.tags.includes("cold") || i.tags.includes("best"));
+            
+            recs.sort(() => 0.5 - Math.random()).slice(0, 6).forEach((item, idx) => {
+                container.innerHTML += `
+                    <div class="bg-sky-50 dark:bg-slate-800/50 p-2 rounded-xl border border-sky-100 dark:border-slate-700 flex flex-col items-center gap-2 hover:bg-white dark:hover:bg-slate-700 transition cursor-pointer scale-in shadow-sm text-center" style="animation-delay: ${idx * 50}ms" onclick="addToCart(${item.id})">
+                        <div class="text-3xl">${item.img}</div>
+                        <div class="w-full"><h3 class="font-bold text-[10px] dark:text-white leading-tight truncate">${item.name}</h3><p class="text-[10px] text-blue-600 dark:text-sky-400 font-bold">${formatRp(item.price)}</p></div>
+                    </div>
+                `;
+            });
+        }
+        
+        let currentCategory = 'All';
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                const isActive = btn.innerText.includes(cat) || (cat === 'All' && btn.innerText === 'Semua');
+                btn.className = isActive ? "cat-btn bg-gradient-brand text-white px-4 py-2 rounded-full text-xs font-bold shadow-md shadow-blue-200 dark:shadow-none transition transform scale-105 whitespace-nowrap" : "cat-btn bg-white dark:bg-darkcard text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition hover:border-blue-400 hover:text-blue-500";
+            });
+            renderMenu(cat, document.getElementById('search-input').value);
+        }
+
+        function setWeather(w) { renderAI(w); }
+        function toggleDarkMode() { document.documentElement.classList.toggle('dark'); lucide.createIcons(); }
+
+        // Init
+        document.getElementById('search-input').addEventListener('input', (e) => renderMenu(currentCategory, e.target.value));
+        window.onload = () => { renderMenu(); renderAI(); lucide.createIcons(); };
+    </script>
+</body>
+</html>
